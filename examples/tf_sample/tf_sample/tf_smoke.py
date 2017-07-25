@@ -20,11 +20,9 @@ def parse_args():
   """Parse the command line arguments."""
   parser = argparse.ArgumentParser()
 
-  parser.add_argument(
-        "--sleep_secs",
-        default=0,
-        type=int,
-        help=("Amount of time to sleep at the end"))
+  parser.add_argument('--gpu', dest='gpu', action='store_true')
+  parser.add_argument('--no-gpu', dest='gpu', action='store_false')
+  parser.set_defaults(gpu=False)
 
   # TODO(jlewi): We ignore unknown arguments because the backend is currently
   # setting some flags to empty values like metadata path.
@@ -32,11 +30,13 @@ def parse_args():
   return args
 
 
-def run(server, cluster_spec):
+def run(server, cluster_spec, use_gpu):
   """Build the graph and run the example.
 
   Args:
     server: The TensorFlow server to use.
+    cluster_spec: The cluster spec.
+    use_gpu: Whether or not to use GPUs.
 
   Raises:
     RuntimeError: If the expected log entries aren't found.
@@ -54,6 +54,8 @@ def run(server, cluster_spec):
     for job_name in cluster_spec.keys():
       for i in range(len(cluster_spec[job_name])):
         d = "/job:{0}/task:{1}".format(job_name, i)
+        if use_gpu:
+          d += "/gpu:0"
         with tf.device(d):
           a = tf.constant(range(width * height), shape=[height, width])
           b = tf.constant(range(width * height), shape=[height, width])
@@ -76,6 +78,8 @@ def run(server, cluster_spec):
         result = sess.run(r)
         logging.info("Result: %s", result)
 
+    # TODO(jlewi): We should redirect logging output to a file and then open up that file and verify
+    # that ops were correctly assigned.
 
 def main():
   """Run training.
@@ -135,7 +139,7 @@ def main():
   elif job_type == "master" or not job_type:
     logging.info("Running master.")
     with tf.device(device_func):
-      run(server=server, cluster_spec=cluster_spec)
+      run(server=server, cluster_spec=cluster_spec, use_gpu=args.gpu)
   else:
     raise ValueError("invalid job_type %s" % (job_type,))
 

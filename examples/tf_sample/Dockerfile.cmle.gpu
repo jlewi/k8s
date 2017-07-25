@@ -1,0 +1,9 @@
+# TODO(jlewi): Get rid of this Dockerfile and just use the tf_sample image.
+# The sole reason for this Dockerfile is to try to reproduce the CUDA initialization errors we are seeing
+# with the 375.51 drivers.
+FROM gcr.io/cloud-ml-service-private/cloud-ml-training-gpu:v1_0ga-375.51-cloud_ml_v2_20170707_1435_RC00
+RUN mkdir -p /opt/cmle
+COPY tf_sample/tf_smoke.py /opt/cmle/
+# Remove sitecustomize
+RUN rm /var/sitecustomize/*
+ENTRYPOINT ["python", "/opt/cmle/tf_smoke.py"]
