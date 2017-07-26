@@ -12,6 +12,7 @@ import (
 
 const (
   TPRKind        = "tf-job"
+  TPRKindKubeCtl =  "TfJob"
   TPRKindPlural  = "tfjobs"
   TPRGroup       = "mlkube.io"
   TPRVersion     = "v1beta1"

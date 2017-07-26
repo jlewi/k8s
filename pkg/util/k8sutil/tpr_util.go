@@ -27,6 +27,7 @@ import (
 	"k8s.io/apimachinery/pkg/runtime/serializer"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/pkg/api"
+	"github.com/prometheus/common/log"
 )
 
 // TFJobClient defines an interface for working with TfJob TPRs.
@@ -121,9 +122,13 @@ func listTfJobsURI(ns string) string {
 }
 
 func (c *TfJobRestClient) Create(ns string, j *spec.TfJob) (*spec.TfJob, error) {
+	//j.Kind = spec.TPRKind
+	// j.Kind = "mlkube.io/v1beta1"
+	// j.APIVersion = spec.TPRVersion
 	uri := fmt.Sprintf("/apis/%s/%s/namespaces/%s/%s/", spec.TPRGroup, spec.TPRVersion, ns, spec.TPRKindPlural)
 	b, err := c.restcli.Post().RequestURI(uri).Body(j).DoRaw()
 	if err != nil {
+		log.Errorf("Error creating TfJob: %v", err)
 		return nil, err
 	}
 	return readOutTfJob(b)

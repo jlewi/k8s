@@ -11,5 +11,5 @@ spec:
       containers:
       - name: job
         image: gcr.io/tf-on-k8s-dogfood/tf_operator:latest
-        command: ["/opt/mlkube/test/gpu_load",  "--image=gcr.io/cloud-ml-dev/tf_smoke_cmle-375-20:latest", "--repeats=1000",]
+        command: ["/opt/mlkube/test/gpu_load",  "--image=gcr.io/cloud-ml-dev/tf_smoke_cmle-375-20:latest", "--repeats=100000",]
       restartPolicy: Never
