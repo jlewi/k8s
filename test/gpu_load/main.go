@@ -31,6 +31,7 @@ const (
 var (
 	image   = flag.String("image", "gcr.io/cloud-ml-dev/tf_smoke_cmle:latest", "The Docker image to use with the TfJob.")
 	repeats = flag.Int("repeats", 200, "Number of times to Repeat the test.")
+	cleanup = flag.Bool("cleanup", false, "Whether to cleanup TfJobs; prevents logs from being available.")
 )
 
 func run() error {
@@ -173,8 +174,9 @@ func run() error {
 		}
 	}
 
-  // DO NOT Submit skip delete
-  return nil
+  if !*cleanup {
+		return nil
+	}
 
 	// Delete the job and make sure all subresources are properly garbage collected.
 	if err := tfJobClient.Delete(Namespace, name); err != nil {
@@ -224,14 +226,16 @@ func main() {
 	flag.Parse()
 
 	for i := 0; i < *repeats; i++ {
+    fmt.Printf("Run %v \n", i)
+    log.Infof("Run %v", i)
 		err := run()
 
 		// Generate TAP (https://testanything.org/) output
 		fmt.Println("1..1")
 		if err == nil {
-			fmt.Println("ok 1 - Successfully ran TfJob")
+			fmt.Printf("ok 1 - Successfully ran TfJob\n")
 		} else {
-			fmt.Println("not ok 1 - Running TfJob failed %v", err)
+			fmt.Printf("not ok 1 - Running TfJob failed %v\n", err)
 		}
 	}
 }

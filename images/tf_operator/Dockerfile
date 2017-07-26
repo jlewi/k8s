@@ -5,8 +5,10 @@ RUN mkdir -p /opt/mlkube
 RUN mkdir -p /opt/mlkube/test
 COPY tf_operator /opt/mlkube
 COPY e2e /opt/mlkube/test
+COPY gpu_load /opt/mlkube/test/gpu_load
 RUN chmod a+x /opt/mlkube/tf_operator
 RUN chmod a+x /opt/mlkube/test/e2e
+RUN chmod a+x /opt/mlkube/test/gpu_load
 
 # TODO(jlewi): Reduce log level.
 ENTRYPOINT ["/opt/mlkube/tf_operator", "-alsologtostderr"]

@@ -9,6 +9,13 @@ ROOT_DIR=${SRC_DIR}/../../
 
 . ${ROOT_DIR}/config.sh
 
+IMAGE=gcr.io/cloud-ml-dev/tf_smoke_cmle-375-20:latest
+SRC_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
+docker build -t $IMAGE -f ${SRC_DIR}/Dockerfile.cmle.old ${SRC_DIR}
+gcloud docker -- push $IMAGE
+echo pushed $IMAGE
+
 IMAGE=gcr.io/cloud-ml-dev/tf_smoke_cmle:latest
 SRC_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 

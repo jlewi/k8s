@@ -10,6 +10,7 @@ that distributed training is working by executing ops on all devices.
 import argparse
 import json
 import logging
+import numpy as np
 import os
 import re
 import tensorflow as tf
@@ -50,6 +51,8 @@ def run(server, cluster_spec, use_gpu):
     height = 10
     results = []
 
+    noise = np.random.randn(height, width)
+
     # The master assigns ops to every TFProcess in the cluster.
     for job_name in cluster_spec.keys():
       for i in range(len(cluster_spec[job_name])):
@@ -57,8 +60,8 @@ def run(server, cluster_spec, use_gpu):
         if use_gpu:
           d += "/gpu:0"
         with tf.device(d):
-          a = tf.constant(range(width * height), shape=[height, width])
-          b = tf.constant(range(width * height), shape=[height, width])
+          a = tf.constant(noise, shape=[height, width])
+          b = tf.constant(noise, shape=[height, width])
           c = tf.multiply(a, b)
           results.append(c)
 

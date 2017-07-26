@@ -12,8 +12,10 @@ DIR=`mktemp -d`
 echo Use ${DIR} as context
 go install mlkube.io/cmd/tf_operator
 go install mlkube.io/test/e2e
+go install mlkube.io/test/gpu_load
 cp ${GOPATH}/bin/tf_operator ${DIR}/
 cp ${GOPATH}/bin/e2e ${DIR}/
+cp ${GOPATH}/bin/gpu_load ${DIR}/
 cp ${SRC_DIR}/Dockerfile ${DIR}/
 
 docker build -t $IMAGE -f ${DIR}/Dockerfile ${DIR}
