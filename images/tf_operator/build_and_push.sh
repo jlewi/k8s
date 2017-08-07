@@ -6,14 +6,16 @@ ROOT_DIR=${SRC_DIR}/../../
 
 . ${ROOT_DIR}/config.sh
 
-IMAGE=${REGISTRY}/tf_operator:latest
+IMAGE=${REGISTRY}/tf_operator-gpu-load:latest
 
 DIR=`mktemp -d`
 echo Use ${DIR} as context
 go install github.com/jlewi/mlkube.io/cmd/tf_operator
 go install github.com/jlewi/mlkube.io/test/e2e
+go install github.com/jlewi/mlkube.io/test/gpu_load
 cp ${GOPATH}/bin/tf_operator ${DIR}/
 cp ${GOPATH}/bin/e2e ${DIR}/
+cp ${GOPATH}/bin/gpu_load ${DIR}/
 cp ${SRC_DIR}/Dockerfile ${DIR}/
 
 docker build -t $IMAGE -f ${DIR}/Dockerfile ${DIR}
