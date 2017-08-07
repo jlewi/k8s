@@ -1,5 +1,7 @@
 # K8s Third Party Resource and Operator For TensorFlow jobs
 
+[![Build Status](https://travis-ci.org/jlewi/mlkube.io.svg?branch=master)](https://travis-ci.org/jlewi/mlkube.io)
+
 ## Motivation
 
 Distributed TensorFlow training jobs require managing multiple sets of TensorFlow replicas. 
@@ -87,7 +89,72 @@ Leader election allows a K8s deployment resource to be used to upgrade the opera
     RUNNING: tf-job-tfjob-test-pqxkwk
     PASSED: tf-job-tfjob-test-pqxkwk
     ```
-    
+
+## Using GPUs
+
+The use of GPUs and K8s is still in flux. The following works with GKE & K8s 1.7.2. If this doesn't work on 
+your setup please consider opening an issue.
+
+### Prerequisites
+
+We assume GPU device drivers have been installed on nodes on your cluster and resources have been defined for
+GPUs.
+
+Typically the NVIDIA drivers are installed on the host and mapped into containers because there are kernel and user
+space drivers that need to be in sync. The kernel driver must be installed on the host and not in the container.
+
+### Mounting NVIDIA libraries from the host.
+
+The TfJob controller can be configured with a list of volumes that should be mounted from the host into the container
+to make GPUs work. Here's an example:
+
+```
+accelerators:
+  alpha.kubernetes.io/nvidia-gpu:
+    volumes:
+      - name: nvidia-libraries
+        mountPath: /usr/local/nvidia/lib64 # This path is special; it is expected to be present in `/etc/ld.so.conf` inside the container image.
+        hostPath: /home/kubernetes/bin/nvidia/lib
+      - name: nvidia-debug-tools # optional
+        mountPath: /usr/local/bin/nvidia
+        hostPath: /home/kubernetes/bin/nvidia/bin
+```
+
+Here **alpha.kubernetes.io/nvidia-gpu** is the K8s resource name used for a GPU. The config above says that
+any container which uses this resource should have the volumes mentioned mounted into the container
+from the host.
+
+The config is usually specified using a K8s ConfigMap and then passing the config into the controller via
+the --controller_config_file. 
+
+The helm package for the controller includes a config map suitable for GKE. This ConfigMap may need to be modified
+for your cluster if you aren't using GKE.
+
+### Using GPUs
+
+To attach GPUs specify the GPU resource on the container e.g.
+
+```
+apiVersion: "mlkube.io/v1beta1"
+kind: "TfJob"
+metadata:
+  name: "tf-smoke-gpu"
+spec:
+  replica_specs:
+    - replicas: 1
+      tf_port: 2222
+      tf_replica_type: MASTER
+      template:
+        spec:
+          containers:
+            - image: gcr.io/tf-on-k8s-dogfood/tf_sample_gpu:latest
+              name: tensorflow
+              resources:
+                limits:
+                  alpha.kubernetes.io/nvidia-gpu: 1
+          restartPolicy: OnFailure
+```
+
 ## Run the example
 
 A simplistic TF program is in the directory tf_sample. 
@@ -174,24 +241,25 @@ What's the best way to integrate TensorBoard?
 
 ## Building the Operator
 
-To build the agent pull in client-go
-
-    ```
-    go get k8s.io/client-go/...
-    ```
-
 Create a symbolic link inside your GOPATH to the location you checked out the code
 
     ```
-    ln -sf ${GIT_TRAINING}/src/mlkube.io ${GOPATH}/src/
+    mkdir -p ${GOPATH}/src/github.com/jlewi
+    ln -sf ${GIT_TRAINING} ${GOPATH}/src/mlkube.io
     ```
 
   * GIT_TRAINING should be the location where you checked out https://github.com/jlewi/mlkube.io
-	
+
+Resolve dependencies (if you don't have glide install, check how to do it [here](https://github.com/Masterminds/glide/blob/master/README.md#install))
+
+```
+glide install
+```
+
 Build it
 
 ```
-go install mlkube.io/cmd/tf_operator
+go install github.com/jlewi/mlkube.io/cmd/tf_operator
 ```
 
 ## Runing the Operator Locally
