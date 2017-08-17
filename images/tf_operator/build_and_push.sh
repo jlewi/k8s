@@ -6,7 +6,7 @@ ROOT_DIR=${SRC_DIR}/../../
 
 . ${ROOT_DIR}/config.sh
 
-IMAGE=${REGISTRY}/tf_operator-gpu-load:latest
+IMAGE=${REGISTRY}/tf_operator-gpu-load:cuda_init
 
 DIR=`mktemp -d`
 echo Use ${DIR} as context
