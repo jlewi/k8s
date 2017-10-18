@@ -47,6 +47,8 @@ def clone_repo():
   """
   go_path = os.getenv("GOPATH")
   # REPO_OWNER and REPO_NAME are the environment variables set by Prow.
+  # REPO_OWNER and REPO_NAME won't be set for periodic jobs so we resort
+  # to default values.
   repo_owner = os.getenv("REPO_OWNER", GO_REPO_OWNER)
   repo_name = os.getenv("REPO_NAME", GO_REPO_NAME)
 
