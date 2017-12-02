@@ -9,7 +9,7 @@ spec:
     spec:      
       containers:
          - name: tensorflow
-           image: gcr.io/cloud-ml-dev/test_launcher:v20171202-2113e22-dirty-f68987           
+           image: gcr.io/cloud-ml-dev/test_launcher:v20171202-b63d8a5-dirty-d80774           
            imagePullPolicy: Always
            workingDir: /opt
            args:

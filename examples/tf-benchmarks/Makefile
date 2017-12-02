@@ -2,6 +2,16 @@ IMG = gcr.io/cloud-ml-dev/test_launcher
 TAG := $(shell date +v%Y%m%d)-$(shell git describe --tags --always --dirty)-$(shell git diff | sha256sum | cut -c -6)
 DIR := ${CURDIR}
 
+CPU_BASE = tensorflow/tensorflow:nightly
+
+BENCH_MARKS_IMAGE := gcr.io/cloud-ml-dev/tf-benchmarks
+
+# Build the cpu image
+build-cpu:
+	jinja2 Dockerfile.template --format=yaml -D base_image=$(CPU_BASE) > Dockerfile.cpu
+	docker build -t $(BENCH_MARKS_IMAGE):$(TAG) -f Dockerfile.cpu ./
+	gcloud docker -- push $(BENCH_MARKS_IMAGE):$(TAG)
+
 build:
 	docker build -t $(IMG):$(TAG) -f Dockerfile.example ./
 	gcloud docker -- push $(IMG):$(TAG)

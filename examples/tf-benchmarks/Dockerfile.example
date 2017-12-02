@@ -7,4 +7,4 @@ COPY launcher.py /opt
 COPY test_program.py /opt
 RUN chmod a+rwx  /opt/*
 
-ENTRYPOINT ["/opt/launcher.py"]
+ENTRYPOINT ["/opt/launcher.sh"]

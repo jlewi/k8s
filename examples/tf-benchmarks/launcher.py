@@ -14,7 +14,7 @@ import time
 def run_and_stream(cmd):
   logging.info("Running %s", " ".join(cmd))
   process = subprocess.Popen(cmd, stdout=subprocess.PIPE,
-                             stderr=subprocess.STDOUT, shell=True)
+                             stderr=subprocess.STDOUT)
 
   while process.poll() is None:
     process.stdout.flush()
@@ -67,12 +67,12 @@ if __name__ == "__main__":
       print("master runs forever.")
       time.sleep(600)
 
-  print(" ".join(command))
+  #print(" ".join(command))
   logging.info("Command to run: %s", " ".join(command))
-  #with open("/opt/run_benchmarks.sh", "w") as hf:
-    #hf.write("#!/bin/bash\n")
-    #hf.write(" ".join(command))
-    #hf.write("\n")
+  with open("/opt/run_benchmarks.sh", "w") as hf:
+    hf.write("#!/bin/bash\n")
+    hf.write(" ".join(command))
+    hf.write("\n")
 
   #if job_name.lower() == "ps":
     #subprocess.check_call(command)
@@ -82,6 +82,5 @@ if __name__ == "__main__":
   run_and_stream(command)
   logging.info("Command finished.")
   while True:
-    print("Command ran successfully. Sleep for ever.")
-    logging.info("Sleep for ever.")
+    logging.info("Command ran successfully sleep for ever.")
     time.sleep(600)
