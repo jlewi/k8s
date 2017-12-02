@@ -18,6 +18,7 @@ def run_and_stream(cmd):
 
   while process.poll() is None:
     process.stdout.flush()
+    print("polling subprocess output")
     for line in iter(process.stdout.readline, ''):
       logging.info(line.strip())
 
@@ -36,11 +37,12 @@ if __name__ == "__main__":
                               '|%(pathname)s|%(lineno)d| %(message)s'),
                       datefmt='%Y-%m-%dT%H:%M:%S',
                       )
-  tf_config = os.environ.get('TF_CONFIG')
+  logging.info("Launcher started.")
+  tf_config = os.environ.get('TF_CONFIG', '{}')
   tf_config_json = json.loads(tf_config)
-  cluster = tf_config_json.get('cluster')
-  job_name = tf_config_json.get('task', {}).get('type')
-  task_index = tf_config_json.get('task', {}).get('index')
+  cluster = tf_config_json.get('cluster', {})
+  job_name = tf_config_json.get('task', {}).get('type', "")
+  task_index = tf_config_json.get('task', {}).get('index', "")
 
   command = sys.argv[1:]
   ps_hosts = ",".join(cluster.get("ps", []))
@@ -56,17 +58,20 @@ if __name__ == "__main__":
       time.sleep(600)
 
   print(" ".join(command))
-  with open("/opt/run_benchmarks.sh", "w") as hf:
-    hf.write("#!/bin/bash\n")
-    hf.write(" ".join(command))
-    hf.write("\n")
+  logging.info("Command to run: %s", " ".join(command))
+  #with open("/opt/run_benchmarks.sh", "w") as hf:
+    #hf.write("#!/bin/bash\n")
+    #hf.write(" ".join(command))
+    #hf.write("\n")
 
   #if job_name.lower() == "ps":
     #subprocess.check_call(command)
-  #else:
-    ## Hack so we can manually log in and run the command to see the output
-    #print("Skipped actually running command.")
-  # run_and_stream(command)
+  ##else:
+    ### Hack so we can manually log in and run the command to see the output
+    ##print("Skipped actually running command.")
+  run_and_stream(command)
+  logging.info("Command finished.")
   while True:
     print("Command ran successfully. Sleep for ever.")
+    logging.info("Sleep for ever.")
     time.sleep(600)
