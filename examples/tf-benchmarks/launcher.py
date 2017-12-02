@@ -4,13 +4,38 @@
 All the launcher does is turn TF_CONFIG environment variable
 into extra arguments to append to the command line.
 """
-
+import logging
 import json
 import os
 import subprocess
 import sys
 import time
+
+def run_and_stream(cmd):
+  logging.info("Running %s", " ".join(cmd))
+  process = subprocess.Popen(cmd, stdout=subprocess.PIPE,
+                             stderr=subprocess.STDOUT)
+
+  while process.poll() is None:
+    process.stdout.flush()
+    for line in iter(process.stdout.readline, ''):
+      logging.info(line.strip())
+
+  process.stdout.flush()
+  for line in iter(process.stdout.readline, ''):
+    logging.info(line.strip())
+
+  if process.returncode != 0:
+    raise ValueError("cmd: {0} exited with code {1}".format(
+      " ".join(cmd), process.returncode))
+
 if __name__ == "__main__":
+  logging.getLogger().setLevel(logging.INFO)
+  logging.basicConfig(level=logging.INFO,
+                      format=('%(levelname)s|%(asctime)s'
+                              '|%(pathname)s|%(lineno)d| %(message)s'),
+                      datefmt='%Y-%m-%dT%H:%M:%S',
+                      )
   tf_config = os.environ.get('TF_CONFIG')
   tf_config_json = json.loads(tf_config)
   cluster = tf_config_json.get('cluster')
@@ -31,4 +56,17 @@ if __name__ == "__main__":
       time.sleep(600)
 
   print(" ".join(command))
-  subprocess.check_call(command)
+  with open("/opt/run_benchmarks.sh", "w") as hf:
+    hf.write("#!/bin/bash\n")
+    hf.write(" ".join(command))
+    hf.write("\n")
+
+  #if job_name.lower() == "ps":
+    #subprocess.check_call(command)
+  #else:
+    ## Hack so we can manually log in and run the command to see the output
+    #print("Skipped actually running command.")
+  # run_and_stream(command)
+  while True:
+    print("Command ran successfully. Sleep for ever.")
+    time.sleep(600)
