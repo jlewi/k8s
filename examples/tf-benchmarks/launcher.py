@@ -14,15 +14,25 @@ import time
 def run_and_stream(cmd):
   logging.info("Running %s", " ".join(cmd))
   process = subprocess.Popen(cmd, stdout=subprocess.PIPE,
-                             stderr=subprocess.STDOUT)
+                             stderr=subprocess.STDOUT, shell=True)
 
   while process.poll() is None:
     process.stdout.flush()
-    print("polling subprocess output")
+    if process.stderr:
+      process.stderr.flush()
+    logging.info("polling subprocess output")
+    sys.stderr.flush()
+    sys.stdout.flush()
     for line in iter(process.stdout.readline, ''):
+      logging.info("Read line of subprocess")
+      process.stdout.flush()
       logging.info(line.strip())
 
+  sys.stderr.flush()
+  sys.stdout.flush()
   process.stdout.flush()
+  if process.stderr:
+    process.stderr.flush()
   for line in iter(process.stdout.readline, ''):
     logging.info(line.strip())
 
