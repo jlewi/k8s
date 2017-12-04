@@ -1,6 +1,6 @@
 # Docker image for running examples in Tensorflow models.
 # base_image depends on whether we are running on GPUs or non-GPUs
-FROM tensorflow/tensorflow:nightly
+FROM tensorflow/tensorflow@sha256:bfadad8f2c80424d8d6059d3b8cd6947bf23111dc786fc33db72b56b632a1f28
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
     ca-certificates \

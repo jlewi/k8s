@@ -20,11 +20,9 @@ def run_and_stream(cmd):
     process.stdout.flush()
     if process.stderr:
       process.stderr.flush()
-    logging.info("polling subprocess output")
     sys.stderr.flush()
     sys.stdout.flush()
     for line in iter(process.stdout.readline, ''):
-      logging.info("Read line of subprocess")
       process.stdout.flush()
       logging.info(line.strip())
 
@@ -62,25 +60,26 @@ if __name__ == "__main__":
   command.append("--worker_hosts=" + worker_hosts)
   command.append("--task_index={0}".format(task_index))
 
+  # TODO(jlewi): This is a work around
+  # https://github.com/tensorflow/k8s/issues/192
+  # Since TfJob requires a master but the tf benchmark
+  # code doesn't know what to do with master we just run
+  # forever in the master.
   if job_name.lower() == "master":
     while True:
       print("master runs forever.")
       time.sleep(600)
 
-  #print(" ".join(command))
   logging.info("Command to run: %s", " ".join(command))
   with open("/opt/run_benchmarks.sh", "w") as hf:
     hf.write("#!/bin/bash\n")
     hf.write(" ".join(command))
     hf.write("\n")
 
-  #if job_name.lower() == "ps":
-    #subprocess.check_call(command)
-  ##else:
-    ### Hack so we can manually log in and run the command to see the output
-    ##print("Skipped actually running command.")
   run_and_stream(command)
-  logging.info("Command finished.")
+  logging.info("Finished: %s", " ".join(command))
+  # We don't want to terminate because TfJob will
+  # just restart the job.
   while True:
     logging.info("Command ran successfully sleep for ever.")
     time.sleep(600)
