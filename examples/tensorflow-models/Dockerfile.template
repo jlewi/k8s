@@ -8,12 +8,16 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     git
 
 # TODO(jlewi): Stop using my branch once we merge the PR to support writing
-# to GCS
+# to GCS:
+# https://github.com/tensorflow/models/pull/2607
+#
 # Checkout tensorflow/models and pin to a particular version
 # RUN git clone https://github.com/tensorflow/models.git /tensorflow_models && \
 #    cd /tensorflow_models && \
 #    git checkout d86aa76
 
+# inception_kubeflow branch has changes to support configuring
+# distributed jobs based on TF_CONFIG
 RUN git clone https://github.com/jlewi/models.git /tensorflow_models && \
     cd /tensorflow_models && \
-    git checkout generate_records
+    git checkout inception_kubeflow
